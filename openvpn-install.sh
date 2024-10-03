@@ -212,16 +212,6 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 		read -p "multiple clients [1]: " multiple_client
 	done
 	echo
-         #compress
-        echo "Do you want to compress?"
-	echo "   1) Yes"
-	echo "   2) No"
- 	read -p "compress [1]: " compress
-	until [[ -z "$compress" || "$compress" =~ ^[1-2]$ ]]; do
-		echo "$compress: invalid selection."
-		read -p "compress [1]: " compress
-	done
-	echo
 	echo "OpenVPN installation is ready to begin."
 	# Install a firewall if firewalld or iptables are not already available
 	if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
@@ -348,12 +338,6 @@ server 10.8.0.0 255.255.255.0" > /etc/openvpn/server/server.conf
 			echo "duplicate-cn" >>/etc/openvpn/server/server.conf
 		;;
 	esac
-        # compress
-        case "$compress" in
-		1|"")
-			echo "comp-lzo" >>/etc/openvpn/server/server.conf
-		;;
-	esac
 	echo 'push "block-outside-dns"' >> /etc/openvpn/server/server.conf
 	echo "keepalive 10 120
 user nobody
@@ -362,6 +346,10 @@ persist-key
 persist-tun
 verb 3
 max-clients 100
+script-security 3
+auth-user-pass-verify /etc/openvpn/checkpsw.sh via-env
+username-as-common-name
+verify-client-cert none
 crl-verify crl.pem" >> /etc/openvpn/server/server.conf
 	if [[ "$protocol" = "udp" ]]; then
 		echo "explicit-exit-notify" >> /etc/openvpn/server/server.conf
@@ -451,13 +439,9 @@ persist-tun
 remote-cert-tls server
 auth SHA512
 ignore-unknown-option block-outside-dns
+#账号密码验证
+auth-user-pass
 verb 3" > /etc/openvpn/server/client-common.txt
-# compress
-case "$compress" in
-	1|"")
-		echo "comp-lzo" >>/etc/openvpn/server/client-common.txt
-	;;
-esac
 	# Enable and start the OpenVPN service
 	systemctl enable --now openvpn-server@server.service
 	# Generates the custom client.ovpn
