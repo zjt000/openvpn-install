@@ -206,23 +206,12 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
         echo "Do you want the same client ovpn to connect for multiple clients?"
 	echo "   1) Yes"
 	echo "   2) No"
-	until [[ $MULTI_CLIENT_CHOICE =~ ^[1-2]$ ]]; do
-		read -rp "Choice [1-2]: " -e -i 2 MULTI_CLIENT_CHOICE
+ 	read -p "multiple clients [1]: " multiple_client
+	until [[ -z "$multiple_client" || "$multiple_client" =~ ^[1-2]$ ]]; do
+		echo "$multiple_client: invalid selection."
+		read -p "multiple clients [1]: " multiple_client
 	done
-	case $MULTI_CLIENT_CHOICE in
-	1)
-		MULTI_CLIENT="yes"
-		;;
-	2)
-		MULTI_CLIENT="no"
-		;;
-	esac
 	echo
-
- 	if [[ $MULTI_CLIENT == "yes" ]]; then
-    	echo "duplicate-cn" >>/etc/openvpn/server/server.conf
-	fi
- 
 	echo "OpenVPN installation is ready to begin."
 	# Install a firewall if firewalld or iptables are not already available
 	if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
@@ -341,6 +330,12 @@ server 10.8.0.0 255.255.255.0" > /etc/openvpn/server/server.conf
 		6)
 			echo 'push "dhcp-option DNS 94.140.14.14"' >> /etc/openvpn/server/server.conf
 			echo 'push "dhcp-option DNS 94.140.15.15"' >> /etc/openvpn/server/server.conf
+		;;
+	esac
+        #duplicate-cn
+        case "$multiple_client" in
+		1|"")
+			echo "duplicate-cn" >>/etc/openvpn/server/server.conf
 		;;
 	esac
 	echo 'push "block-outside-dns"' >> /etc/openvpn/server/server.conf
