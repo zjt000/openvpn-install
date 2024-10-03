@@ -24,6 +24,10 @@ My:
 
 `chmod 755 /etc/openvpn/checkpwd.sh`
 
-3. 重启服务
+3. 添加账户
+
+`echo 'username1 password1' >> /etc/openvpn/pwd-file`
+
+4. 重启服务
 
 `systemctl restart openvpn-server@server`
