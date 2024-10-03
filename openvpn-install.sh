@@ -329,6 +329,8 @@ group $group_name
 persist-key
 persist-tun
 verb 3
+max-clients 100
+duplicate-cn
 crl-verify crl.pem" >> /etc/openvpn/server/server.conf
 	if [[ "$protocol" = "udp" ]]; then
 		echo "explicit-exit-notify" >> /etc/openvpn/server/server.conf
