@@ -212,6 +212,16 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 		read -p "multiple clients [1]: " multiple_client
 	done
 	echo
+         #增加账号密码进行验证
+        echo "Do you want an account password for verification?"
+	echo "   1) Yes"
+	echo "   2) No"
+ 	read -p "account password for verification [1]: " auth_account
+	until [[ -z "$auth_account" || "$auth_account" =~ ^[1-2]$ ]]; do
+		echo "$auth_account: invalid selection."
+		read -p "account password for verification [1]: " auth_account
+	done
+	echo
 	echo "OpenVPN installation is ready to begin."
 	# Install a firewall if firewalld or iptables are not already available
 	if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
@@ -338,6 +348,15 @@ server 10.8.0.0 255.255.255.0" > /etc/openvpn/server/server.conf
 			echo "duplicate-cn" >>/etc/openvpn/server/server.conf
 		;;
 	esac
+        # 账号密码验证
+        case "$auth_account" in
+		1|"")
+			echo "script-security 3" >>/etc/openvpn/server/server.conf
+			echo "auth-user-pass-verify /etc/openvpn/checkpsw.sh via-env" >>/etc/openvpn/server/server.conf
+			echo "username-as-common-name" >>/etc/openvpn/server/server.conf
+			#echo "verify-client-cert none" >>/etc/openvpn/server/server.conf
+		;;
+	esac
 	echo 'push "block-outside-dns"' >> /etc/openvpn/server/server.conf
 	echo "keepalive 10 120
 user nobody
@@ -346,10 +365,6 @@ persist-key
 persist-tun
 verb 3
 max-clients 100
-script-security 3
-auth-user-pass-verify /etc/openvpn/checkpsw.sh via-env
-username-as-common-name
-verify-client-cert none
 crl-verify crl.pem" >> /etc/openvpn/server/server.conf
 	if [[ "$protocol" = "udp" ]]; then
 		echo "explicit-exit-notify" >> /etc/openvpn/server/server.conf
@@ -439,9 +454,13 @@ persist-tun
 remote-cert-tls server
 auth SHA512
 ignore-unknown-option block-outside-dns
-#账号密码验证
-auth-user-pass
 verb 3" > /etc/openvpn/server/client-common.txt
+# 账号密码验证
+case "$auth_account" in
+	1|"")
+		echo "auth-user-pass" >>/etc/openvpn/server/client-common.txt
+	;;
+esac
 	# Enable and start the OpenVPN service
 	systemctl enable --now openvpn-server@server.service
 	# Generates the custom client.ovpn
