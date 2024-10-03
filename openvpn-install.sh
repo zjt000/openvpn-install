@@ -212,6 +212,16 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 		read -p "multiple clients [1]: " multiple_client
 	done
 	echo
+         #compress
+        echo "Do you want to compress?"
+	echo "   1) Yes"
+	echo "   2) No"
+ 	read -p "compress [1]: " compress
+	until [[ -z "$compress" || "$compress" =~ ^[1-2]$ ]]; do
+		echo "$compress: invalid selection."
+		read -p "compress [1]: " compress
+	done
+	echo
 	echo "OpenVPN installation is ready to begin."
 	# Install a firewall if firewalld or iptables are not already available
 	if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
@@ -332,10 +342,16 @@ server 10.8.0.0 255.255.255.0" > /etc/openvpn/server/server.conf
 			echo 'push "dhcp-option DNS 94.140.15.15"' >> /etc/openvpn/server/server.conf
 		;;
 	esac
-        #duplicate-cn
+        # duplicate-cn
         case "$multiple_client" in
 		1|"")
 			echo "duplicate-cn" >>/etc/openvpn/server/server.conf
+		;;
+	esac
+        # compress
+        case "$compress" in
+		1|"")
+			echo "comp-lzo" >>/etc/openvpn/server/server.conf
 		;;
 	esac
 	echo 'push "block-outside-dns"' >> /etc/openvpn/server/server.conf
@@ -435,6 +451,12 @@ persist-tun
 remote-cert-tls server
 auth SHA512
 ignore-unknown-option block-outside-dns
+        # compress
+        case "$compress" in
+		1|"")
+			echo "comp-lzo" >>/etc/openvpn/server/client-common.txt
+		;;
+	esac
 verb 3" > /etc/openvpn/server/client-common.txt
 	# Enable and start the OpenVPN service
 	systemctl enable --now openvpn-server@server.service
