@@ -15,3 +15,15 @@ Nyr:
 My:
 
 `wget https://raw.githubusercontent.com/zjt000/openvpn-install/master/openvpn-install.sh -O openvpn-install.sh && bash openvpn-install.sh`
+
+1. 创建脚本(将checkpwd.sh里面的内容复制进去)
+
+`vim /etc/openvpn/checkpwd.sh`
+
+2. 添加权限
+
+`chmod 755 /etc/openvpn/checkpwd.sh`
+
+3. 重启服务
+
+`systemctl restart openvpn-server@server`
