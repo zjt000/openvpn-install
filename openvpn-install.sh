@@ -202,6 +202,27 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
 	[[ -z "$client" ]] && client="client"
 	echo
+        #允许具有相同公共名称的多个客户端同时连接.如果没有此选项,OpenVPN将在连接具有相同通用名称的新客户端时断开客户端实例.
+        echo "Do you want the same client ovpn to connect for multiple clients?"
+	echo "   1) Yes"
+	echo "   2) No"
+	until [[ $MULTI_CLIENT_CHOICE =~ ^[1-2]$ ]]; do
+		read -rp "Choice [1-2]: " -e -i 2 MULTI_CLIENT_CHOICE
+	done
+	case $MULTI_CLIENT_CHOICE in
+	1)
+		MULTI_CLIENT="yes"
+		;;
+	2)
+		MULTI_CLIENT="no"
+		;;
+	esac
+	echo
+
+ 	if [[ $MULTI_CLIENT == "yes" ]]; then
+    	echo "duplicate-cn" >>/etc/openvpn/server/server.conf
+	fi
+ 
 	echo "OpenVPN installation is ready to begin."
 	# Install a firewall if firewalld or iptables are not already available
 	if ! systemctl is-active --quiet firewalld.service && ! hash iptables 2>/dev/null; then
@@ -330,7 +351,6 @@ persist-key
 persist-tun
 verb 3
 max-clients 100
-duplicate-cn
 crl-verify crl.pem" >> /etc/openvpn/server/server.conf
 	if [[ "$protocol" = "udp" ]]; then
 		echo "explicit-exit-notify" >> /etc/openvpn/server/server.conf
