@@ -451,13 +451,13 @@ persist-tun
 remote-cert-tls server
 auth SHA512
 ignore-unknown-option block-outside-dns
-        # compress
-        case "$compress" in
-		1|"")
-			echo "comp-lzo" >>/etc/openvpn/server/client-common.txt
-		;;
-	esac
 verb 3" > /etc/openvpn/server/client-common.txt
+# compress
+case "$compress" in
+	1|"")
+		echo "comp-lzo" >>/etc/openvpn/server/client-common.txt
+	;;
+esac
 	# Enable and start the OpenVPN service
 	systemctl enable --now openvpn-server@server.service
 	# Generates the custom client.ovpn
