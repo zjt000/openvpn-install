@@ -16,18 +16,17 @@ My:
 
 `wget https://raw.githubusercontent.com/zjt000/openvpn-install/master/openvpn-install.sh -O openvpn-install.sh && bash openvpn-install.sh`
 
-1. 创建脚本(将checkpwd.sh里面的内容复制进去)
+如何使用账号密码认证需要一下操作:
 
-`vim /etc/openvpn/checkpwd.sh`
+1. 编辑userfile文件
 
-2. 添加权限
+`vim /etc/openvpn/userfile`
 
-`chmod 755 /etc/openvpn/checkpwd.sh`
+格式如下:
 
-3. 添加账户
+client1 123456
 
-`echo 'username1 password1' >> /etc/openvpn/pwd-file`
 
-4. 重启服务
+2. 重启服务
 
 `systemctl restart openvpn-server@server`
