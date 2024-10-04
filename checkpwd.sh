@@ -6,7 +6,7 @@
 # one row per user with the username first followed by
 # one or more space(s) or tab(s) and then the password.
  
-PASSFILE="/etc/openvpn/pwd-file"
+PASSFILE="/etc/openvpn/userfile"
 LOG_FILE="/etc/openvpn/openvpn-password.log"
 TIME_STAMP=`date "+%Y-%m-%d %T"`
  
