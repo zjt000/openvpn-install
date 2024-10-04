@@ -16,7 +16,13 @@ My:
 
 `wget https://raw.githubusercontent.com/zjt000/openvpn-install/master/openvpn-install.sh -O openvpn-install.sh && bash openvpn-install.sh`
 
-如何使用账号密码认证需要一下操作:
+在Nyr大佬的基础上增加以下功能(可选): 
+
+1. 允许具有相同公共名称的多个客户端同时连接
+
+2. 账号密码认证
+
+如何使用账号密码认证需要以下操作:
 
 1. 编辑userfile文件
 
